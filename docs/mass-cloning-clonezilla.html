@@ -1,0 +1,78 @@
+<html>
+<head>
+ <title>Mass Debian OS deployment with Clonezilla</title>
+<style type="text/css">
+code {
+  display: block;
+  white-space: pre-wrap   
+}
+</style>
+</head>
+<body>
+<div id="content">
+		<h3> Mass deployment of Debian OS with CloneZilla </h3>
+		<b>Requirements</b>
+		<ol> 
+                 <li>LAN connectivity</li>
+		 <li>A dedicated server running DHCP and TFTP services</li>
+		 <li>CloneZilla zip file</li>
+		 <li>syslinux-6.0.3.zip file (Available at <a href="https://www.kernel.org/pub/linux/utils/boot/syslinux/">https://www/kernel.org</a></li>
+                 <li>Target client machines</li>
+                </ol>
+ </div>
+<h1>Setting the server to provide boot files across the network</h1>
+<ul>
+ <li>Install isc-dhcp-server package</li>
+  <table><tr><td><code># apt-get install isc-dhcp-server</code></td></tr>
+   </table>
+ <br/>
+  <li>Install tftpd-hpa package</li>
+   <table><tr><td><code># apt-get install tftpd-hpa</code></td></tr>
+   </table>
+<li>Edit /etc/default/tftpd-hpa file with the following contents</li>
+<table><tr><td><code>TFTP_USERNAME="tftp"
+TFTP_DIRECTORY="/srv/tftp"
+TFTP_ADDRESS="0.0.0.0:69"
+TFTP_OPTIONS="--secure"</code></td></tr>
+   </table>
+<br/>
+  <li>Edit /etc/dhcp/dhcpd.conf as shown below</li>
+   <table><tr><td><code>allow booting;
+allow bootp;
+default-lease-time 864000000;
+max-lease-time 43200;
+allow bootp;
+ddns-update-style none;
+
+subnet 10.250.8.0 netmask 255.255.255.0 {
+  range 10.250.8.10 10.250.8.50;
+  default-lease-time 600;
+  max-lease-time 7200;
+  next-server 10.250.8.66;
+  filename "syslinux.efi";
+ }
+</code></td></tr>
+   </table> <br/>
+
+<li>Extract syslinux.zip files to /srv/tftp</li>
+  <table><tr><td><code> # cp \efi64\efi\syslinux.efi /srv/tftp
+  # cp \efi64\com32\elflink\ldlinux\ldlinux.e64 /srv/tftp
+   </code></td></tr>
+   </table>
+ <br/>
+
+<li>Extract clonezill-live.zip files to /srv/tftp</li>
+  <table><tr><td><code> # cp live/vmlinuz /srv/tftp
+  # cp live/initrd.img /srv/tftp
+  # cp live/filesystem.squashfs /srv/tftp
+   </code></td></tr>
+   </table>
+ <br/>
+
+<li>Start the services and boot the clients</li>
+  <table><tr><td><code># systemctl start isc-dhcp-server</code></td></tr>
+    <tr><td><code># systemctl start tftpd-hpa</code></td></tr>
+   </table>
+
+</body>
+</html>
