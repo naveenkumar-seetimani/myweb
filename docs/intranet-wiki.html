@@ -1,0 +1,130 @@
+<html>
+<head><title>Setting an intranet Wiki for your organization</title>
+</head>
+<body>
+<h1>Setting an intranet Wiki for your organization with Mediawiki.</h1>
+<div id="prerequisiet">
+<h2>Pre requisites</h2>
+<ul>
+<li>Install PHP modules  <br/><code> # apt install php-mbstring php-xml php-mysql php-apcu php-intl php-curl curl<br/>
+# systemctl restart apache2 </code> </li><br/>
+
+<li> Install git <br/><code> # apt-get install git-core </code> </li><br/>
+
+<li> Imagemagick (for image thumbnails) <br/><code> # apt-get install imagemagick </code> </li><br/>
+
+<li> Setup database. <br/><code> # mysql -u root -p<br/>mysql> create database mediawiki;<br/>mysql> create user 'mediawiki'@'localhost' identified by 'random_string';<br/>mysql> grant all privileges on mediawiki . * to 'mediawiki'@'localhost';<br/>mysql> flush privileges;<br/>mysql> quit; </code> </li><br/>
+</ul>
+</div>
+
+<div id="mediwiki">
+<h2>Install mediawiki software</h2>
+<ul>
+<li>Change working directory to your Webroot  <br/><code># cd /var/www/html </code> </li><br/>
+
+<li>Find a version using git ls-remote  <br/><code># git ls-remote --heads https://gerrit.wikimedia.org/r/p/mediawiki/core
+....<br/>
+f5a748cda402d61641e6da72a3544f6005c0409f        refs/heads/wmf/1.31.0-wmf.5<br/>
+433022fdf2b2b0b82fdedec5623462af739d8629        refs/heads/wmf/1.31.0-wmf.6<br/> 
+cd3ceb4540f735de003a771d134ce427d230bdf5        refs/heads/wmf/1.31.0-wmf.7   </code> </li><br/>
+
+<li> Clone the chosen version <br/><code>  # git clone --depth=1 --single-branch --branch wmf/1.31.0-wmf.6 https://gerrit.wikimedia.org/r/p/mediawiki/core.git 1.31.0-wmf.6 </code> </li><br/>
+
+<li> Update the submodules and Composer managed libraries    <br/><code># cd 1.31.0-wmf.6<br/>
+# git submodule update --init --recursive   </code> </li><br/>
+</ul>
+
+<h3>Web based Installer</h3>
+<ul>
+<li>This is just the initial install. We will change the URL to access MW later.     <br/><code> # ln -s 1.31.0-wmf.6 mediawiki  </code> </li><br/>
+
+<li>Browse to http://localhost/mediawiki and the first run wizard will start. Keep the settings to a minimum and don't enable any modules. All of this can be changed later. At the end, download the provided LocalSettings.php file and upload it to the web server's filesystem at /var/www/html. Finally symlink to it from the wiki folder.     <br/><code># cd /var/www/html/mediawiki<br/>
+# ln -s /var/www/html/LocalSettings.php   </code> </li><br/>
+
+<li>Disable the Minerva Neue skin in LocalSettings.php to get the wiki to load until it is no longer dependent on MobileFrontend[5]. Edit LocalSettings.php and towards the end put a # in front of<br/> <code>#wfLoadSkin( 'MinervaNeue' );   </code> </li><br/>
+</ul>
+
+<h3>Move images out</h3>
+     <code># mkdir /var/www/html/images<br/>
+# chown www-data:www-data /var/www/html/images<br/>
+# cd /var/www/html/mediawiki<br/>
+# rm -Rvf images<br/>
+# ln -s /var/www/html/images   </code> 
+</div>
+
+<div id="shorturls">
+<h2>Short URLs</h2>
+<ul>
+<li>Add a couple of Aliases outside of the virtual host definition. These are for the final desired short URLs<br/>
+<code># /etc/apache2/sites-available/local.conf<br/>
+ServerName wiki.example.co.uk
+<br/><VirtualHost _default_:443><br/>
+...
+</VirtualHost><br/><br/>
+Alias /wiki /var/www/html/mediawiki/index.php<br/> 
+Alias /w    /var/www/html/mediawiki  </code> </li><br/>
+
+<li>Change $wgScriptPath and add $wgArticlePath in LocalSettings.php to match the short URL<br/>      <code> ...<br/>
+$wgScriptPath  = "/w";      <br/>
+$wgArticlePath = '/wiki/$1';
+...   </code> </li><br/>
+
+
+<li>      <code> # systemctl restart apache2   </code> </li><br/>
+<li>Browse to http://localhost and check http://localhost/wiki/Special:Version to make sure it all looks OK.</li>
+</ul>
+</div>
+
+<div id="logo">
+<h2>Logo</h2>
+<ul>
+<li>Copy a logo file into /var/www/html and rename it to logo.gif (or.png or whatever) and reference it in LocalSettings.php<br/>
+<code>$wgLogo = "/logo.gif";</code></li><br/>
+</ul>
+</div>
+
+<div id="cache">
+<h2>Cache</h2>
+<ul>
+<li>This enables a simple filesystem based cache which will help speed up page load times. Create a cache directory for the wiki to use
+     <br/><code># mkdir /var/cache/mediawiki<br/>
+# chown www-data:www-data /var/cache/mediawiki
+   </code>  </li><br/>
+
+<li>Add this to LocalSettings.php    <br/> <code>$wgCacheDirectory= "/var/cache/mediawiki";   </code>  </li><br/>
+</ul>
+</div>
+
+<div id="cron">
+<h2>Cronjob for runJobs</h2>
+<ul>
+<li>Add the following to LocalSettings.php to disable runjobs<br/>       <code># Run jobs via cron<br/>
+$wgJobRunRate = 0;    </code> </li><br/>
+
+<li>Add this to crontab (change the timings to suit - this example runs every seven minutes)<br/>       <code># crontab -u www-data -e<br/>
+2-59/7 * * * * /usr/bin/php /var/www/html/mediawiki/maintenance/runJobs.php > /var/log/mediawiki/runJobs.log 2>&1
+   </code> </li><br/>
+
+<li>Create a directory for the log        <br/><code># mkdir /var/log/mediawiki<br/>
+# chown www-data:www-data /var/log/mediawiki    </code> </li><br/>
+
+<li>When you are happy that runJobs is working correctly then either use something like logrotate to handle the ever growing log file or disable it by removing the redirection in crontab.    </li><br/>
+</ul>
+</div>
+
+<div id="wikieditor">
+<h2>Enable Wikieditor</h2>
+<ul>
+<li>Edit LocalSettings.php and add this at the bottom     <br/><code># End of automatically generated settings.<br/>
+# Add more configuration options below.<br/><br/>
+wfLoadExtension( 'WikiEditor' );<br/><br/>
+# WikiEditor<br/>
+$wgDefaultUserOptions['usebetatoolbar']     = 1;<br/>
+$wgDefaultUserOptions['usebetatoolbar-cgd'] = 1;<br/>
+$wgDefaultUserOptions['wikieditor-preview'] = 1;<br/>
+$wgDefaultUserOptions['wikieditor-publish'] = 1;<br/>
+# WikiEditor  </code>   </li><br/>
+
+<li>Try editing a page. if the editor does not appear then hold down shift and press the reload button in your browser to clear the cached page. </li>
+</ul>
+</div>

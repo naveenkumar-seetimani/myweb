@@ -1,0 +1,73 @@
+<html>
+<head>
+<title>Setting MOODLE learnign management system and Virtual Programming Lab plugin</title>
+<style type="text/css">
+code {
+display:block;
+font-size: 15px;
+}
+li {
+font-size:20px;
+}
+</style>
+</head>
+<body>
+<h1>Setting moodle on a server</h1>
+<ol>
+	<li>Navigate to the document root of your server (/var/www/html) <br/><br/>
+		<code> # cd /var/www/html </code> </li><br/>
+
+	<li>Obtain the moodle code from git <br/><br/>
+		<code> # apt-get install git-core <br/> # git clone https://github.com/moodle/moodle.git <br/># cd moodle <br/># git branch -a <br/># git branch --track MOODLE_23_STABLE origin/MOODLE_23_STABLE</code> <code># git checkout MOODLE_23_STABLE</code></li><br/>
+
+	<li>Install the required dependencies  <br/><br/>
+		<code> # sudo apt-get install apache2 mysql-client mysql-server php5 <br/> # sudo apt-get install graphviz aspell php5-pspell php5-curl php5-gd php5-intl php5-mysql php5-xmlrpc php5-ldap clamav </code> </li><br/>
+
+	<li>Restart apache server <br/><br/> <code> sudo service apache2 restart </code>  </li><br/>
+
+	<li>Setting MySQL database for Moodle<br/><br/>
+		<code># mysql -u root -p <br/> mysql> CREATE DATABASE moodle; <br/> create user 'moodledude'@'localhost' IDENTIFIED BY 'passwordformoodledude'; <br/>mysql> GRANT all ON moodle.* TO moodledude@localhost;<br/>mysql> FLUSH PRIVILEGES;<br/>mysql> commit;</br/>mysql> quit;
+ </code> </li><br/>	
+
+	<li>Temporarily make the webroot writeable  <br/><br/>
+		<code> # chmod -R 777 /var/www/html/moodle</code> </li><br/>
+
+        <li> Run the web installer in your browser by navigating to <br/><br/>
+            <code> http://YOUR-SERVER-IP/moodle </code> </li><br/><br/>
+        <li> Revert the write permission given to the webroot <br/><br/>
+           <code>chmod -R 0755 /var/www/html/moodle</code></li><br/>
+
+</ol>
+
+<h1>Setting Virtual Programming lab plugin for Moodle installation</h1>
+<ol>
+<li>Download VPL plugin from Moodle website</li> <br/><br/>
+<code>https://moodle.org/plugins/view.php?plugin=mod_vpl</code><br/><br/>
+
+<li>Extract the plugin in moodle/mod directory</li> <br/><br/>
+<code># cd /var/www/html/moodle/mod <br/># tar -xvzf vpl.tar.gz</code><br/><br/>
+
+<li>Open the Moodle from web server and login as Administrator and upgrade the moodle with VPL plugin installtion</li> <br/>
+
+</ol>
+
+<h1>Setting VPL jail server</h1>
+<ol>
+<li>Download, extract and install vpl-jail-server</li> <br/>
+<code># wget http://vpl.dis.ulpgc.es/releases/vpl-jail-system-2.2.0.tar.gz<br/># tar -xvzf vpl-jail-system-2.2.0.tar.gz<br/># cd vpl-jail-system<br/># ./install-sh</code><br/>
+
+<li>Internet connection will not work. Stop the vpl service</li> <br/>
+<code># systemctl stop vpl-jail-system</code><br/>
+
+<li>Edit the file vpl-jail-system.conf</li> <br/>
+<code># nano /etc/vpl/vpl-jail-system.conf <br/></code>Change Port to 8080. And FIREWALL=0<br/><br/>
+
+<li>Start the vpl-jail-system service</li> <br/>
+<code># systemctl start vpl-jail-system<br/>
+</code><br/>
+<li>Replace the default Jail server IP address to your local jail server's IP in Moodle VPL plugin settings</li> <br/><br/>
+<code></code><br/><br/>
+
+</ol>
+</body>
+</html>
