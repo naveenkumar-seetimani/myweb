@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>Hadoop Commands</title>
+<style type="text/css">
+code {
+display: block;
+padding: 10px;
+background-color: #eee;
+border: 1px solid #999;
+width: 40%;
+}
+</style>
+</head>
+<body>
+<h1>Frequently Used Hadoop Commands</h1>
+<ol>
+<li>Format the HDFS.</li><br/>
+<code>/hadoop$ bin/hdfs namenode -format</code><br/>
+<li>Creating the HDFS directories required to execute MapReduce jobs.</li><br/>
+<code>/hadoop$ bin/hdfs dfs -mkdir /user<br/><br/>
+/hadoop$ bin/hdfs dfs -mkdir /user/&lt;username&gt;<br/><br/>
+#Replace &lt;username&gt; accordingly</code><br/>
+
+<li>Copying files to HDFS.</li><br/>
+<code>
+#This command will put files to default HDFS directory (/user/&lt;username&gt;)<br/><br/>
+hadoop$ bin/hdfs dfs -put <i>path-to-file-in-local-filesystem</i><br/><br/><br/>
+#This command will copy files to the destination directory of HDFS.<br/>#The below command will copy a file to root of the HDFS<br/><br/>
+hadoop$ bin/hdfs dfs -copyFromLocal <i>path-to-file-in-local-filesystem</i> /
+</code><br/>
+
+<li>Removing a file or directory</li><br/>
+<code>#This command will delete a directory on HDFS<br/><br/>
+hadoop$ bin/hdfs dfs -rmdir /user/&lt;username&gt;/dir<br/><br/><br/>
+#This command will delete a file on HDFS. (In this example, foo.txt file will be deleted)<br/><br/>
+hadoop$ bin/hdfs dfs -rm /user/foo.txt
+</code><br/>
+</ol>
+</body>
+</html>
