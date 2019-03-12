@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tic Tac Toe</title>
+    <script src="play.js"></script>
+    <link rel="stylesheet" type="text/css" href="tictactheme.css">
+    </head>
+
+    <body>
+        <div id="playarea">
+            <div id="menu">
+                <div id="mySidenav" class="sidenav">
+                    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+                    <a href="#" onclick="document.location.reload()">New Game</a>
+                    <a href="#" id="disablemove" onclick="setplayerone('blue'); style.display='none'">Set player 1 as Blue</a>
+                    <a href="#" onclick="showAbout(true)">About</a>
+                </div>
+                <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+            </div>
+
+        <div id="grid">
+        <table>
+            <tr>
+                <td><button class= "button" type="button" id="r00" onclick="mark('0','0')"></button></td>
+                <td><button class= "button" type="button" id="r01" onclick="mark('0','1')"></button></td>
+                <td><button class= "button" type="button" id="r02" onclick="mark('0','2')"></button></td>
+            </tr>
+            <tr>
+                <td><button class= "button" type="button" id="r10" onclick="mark('1','0')"></button></td>
+                <td><button class= "button" type="button" id="r11" onclick="mark('1','1')"></button></td>
+                <td><button class= "button" type="button" id="r12" onclick="mark('1','2')"></button></td>
+            </tr>
+            <tr>
+                <td><button class= "button" type="button" id="r20" onclick="mark('2','0')"></button></td>
+                <td><button class= "button" type="button" id="r21" onclick="mark('2','1')"></button></td>
+                <td><button class= "button" type="button" id="r22" onclick="mark('2','2')"></button></td>
+            </tr>
+
+        </table>
+        </div>
+        <div id="about" class="modal">
+            <div class="modal-content">
+                    <P style="color: yellow"><b>Two Players Tictactoe</b></P>
+                    <p><span style="display:inline-block;transform: rotate(180deg);">&copy;</span> Naveenkumar Seetimani</p>
+                    <p style="font-size: 12px">naveenkumarms96@gmail.com</p>
+                    <p><button onclick="showAbout(false)">OK</button></p>
+            </div>
+        </div>
+        </div>
+
+        <div><h1 id="result">Welcome to Two Player Tictactoe game!!</h1></div>
+    </body>
+    </html>
